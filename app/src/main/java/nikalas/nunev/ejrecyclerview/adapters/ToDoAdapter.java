@@ -1,6 +1,8 @@
 package nikalas.nunev.ejrecyclerview.adapters;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,8 +62,14 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ToDoVH> {
         holder.btnCompeltado.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toDo.setCompletado(!toDo.isCompletado());
-                notifyDataSetChanged();
+                confirmUpdate("Seguro que quieres cambiar",toDo).show();
+            }
+        });
+
+        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmDelete("Seguro que quieres eliminar?", holder.getAdapterPosition()).show();
             }
         });
     }
@@ -72,9 +80,44 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ToDoVH> {
         return objects.size();
     }
 
+    private AlertDialog confirmUpdate(String titulo, ToDo toDo){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder.setTitle(titulo);
+        builder.setCancelable(false);
+
+        builder.setNegativeButton("NO",null);
+        builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                toDo.setCompletado(!toDo.isCompletado());
+                notifyDataSetChanged();
+            }
+        });
+
+        return builder.create();
+    }
+
+    private AlertDialog confirmDelete(String titulo, int posicion){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder.setTitle(titulo);
+        builder.setCancelable(false);
+
+        builder.setNegativeButton("NO",null);
+        builder.setPositiveButton("SI", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                objects.remove(posicion);
+                notifyItemRemoved(posicion);
+            }
+        });
+        return builder.create();
+    }
+
     public class ToDoVH extends RecyclerView.ViewHolder{
         TextView lbTitulo,lbContenido,lbFecha;
-        ImageButton btnCompeltado;
+        ImageButton btnCompeltado, btnDelete;
 
         public ToDoVH(@NonNull View itemView) {
             super(itemView);
@@ -83,6 +126,7 @@ public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ToDoVH> {
             lbContenido = itemView.findViewById(R.id.lbContenidoToDoViewModel);
             lbFecha = itemView.findViewById(R.id.lbFechaToDoViewModel);
             btnCompeltado = itemView.findViewById(R.id.btnCompletadoToDoViewModel);
+            btnDelete = itemView.findViewById(R.id.btnDeleteToDoViewModel);
         }
     }
 }
